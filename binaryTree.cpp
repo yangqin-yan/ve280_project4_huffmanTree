@@ -220,17 +220,81 @@ void BinaryTree::postorder_num() const {
     cout << endl;
 }
 
+bool allPathSumGreaterHelper(int temp, const Node * n, int sum){
+    sum += n->getnum();
+    if(sum > temp){
+        return true;
+    }
+    // leaf
+    if(!n->leftSubtree() && !n->rightSubtree()){
+        return false;
+    }
+    // having children
+    if((n->leftSubtree() && allPathSumGreaterHelper(temp, n->leftSubtree(), sum))
+    || (n->rightSubtree() && allPathSumGreaterHelper(temp, n->rightSubtree(), sum))){
+        return true;
+    }
+    return false;
+}
+
 bool BinaryTree::allPathSumGreater(int temp) const {
     // TODO: implement this function.
+    return allPathSumGreaterHelper(temp, root, 0);
+}
+
+bool covered_by_helper(const Node * thisnode, const Node * treenode){
+    // values are different.
+    if(thisnode->getnum() != treenode->getnum()){
+        return false;
+    }
+    // this has more chilren
+    if((thisnode->leftSubtree() && !treenode->leftSubtree()) ||
+            (thisnode->rightSubtree() && !treenode->rightSubtree())){
+        return false;
+    }
+    else{
+        bool result = true;
+        if(thisnode->leftSubtree()){
+            result *= covered_by_helper(thisnode->leftSubtree(), treenode->leftSubtree());
+        }
+        if(thisnode->rightSubtree()){
+            result *= covered_by_helper(thisnode->rightSubtree(), treenode->rightSubtree());
+        }
+        return result;
+    }
 
 }
 
 bool BinaryTree::covered_by(const BinaryTree &tree) const {
     // TODO: implement this function.
+    // empty tree
+    if(root == nullptr){
+        return true;
+    }
+    return covered_by_helper(root, tree.root);
+}
+
+bool contained_by_helper(const Node * thisnode, const Node * treenode){
+    if(covered_by_helper(thisnode, treenode)){
+        return true;
+    }
+    if(treenode->leftSubtree() && treenode->rightSubtree()){
+        return contained_by_helper(thisnode, treenode->leftSubtree()) +
+        contained_by_helper(thisnode, treenode->rightSubtree());
+    }
+    if(treenode->leftSubtree() && !treenode->rightSubtree()){
+        return contained_by_helper(thisnode, treenode->leftSubtree());
+    }
+    if(!treenode->leftSubtree() && treenode->rightSubtree()){
+        return contained_by_helper(thisnode, treenode->rightSubtree());
+    }
+    // no subtree can cover this
+    return false;
 }
 
 bool BinaryTree::contained_by(const BinaryTree &tree) const {
     // TODO: implement this function.
+    contained_by_helper(root, tree.root);
 }
 
 BinaryTree BinaryTree::copy() const {
