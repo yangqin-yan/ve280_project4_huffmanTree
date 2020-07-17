@@ -47,7 +47,7 @@ void Node::incnum() {
 
 Node *Node::mergeNodes(Node *leftNode, Node *rightNode) {
     // TODO: implement this function.
-    Node* merged = new Node(leftNode->str + rightNode->str, leftNode->num + rightNode->num);
+    Node* merged = new Node(leftNode->str + rightNode->str, leftNode->num + rightNode->num, leftNode, rightNode);
     return merged;
 }
 
@@ -60,6 +60,8 @@ BinaryTree::BinaryTree(Node *rootNode){
 
 
 static void deleteHelper(Node * root){
+    if(!root)
+        return;
     if(root->leftSubtree()){
         deleteHelper(root->leftSubtree());
     }
@@ -101,13 +103,13 @@ string BinaryTree::findPath(const string &s) const {
     return findPathHelper(s,root);
 }
 
-static int sumHelper(const Node * root){
+int sumHelper(const Node * root){
     int sum = 0;
     if(root->rightSubtree()){
-        sum = sumHelper(root->leftSubtree());
+        sum += sumHelper(root->leftSubtree());
     }
     if(root->rightSubtree()){
-        sum = sumHelper(root->rightSubtree());
+        sum += sumHelper(root->rightSubtree());
     }
     return sum + root->getnum();
 }
@@ -146,7 +148,7 @@ int BinaryTree::depth() const {
     if(root == nullptr){
         return 0;
     }
-    return depthHelper(root);
+    return 1 + depthHelper(root);
 }
 // EFFECTS: Returns the depth of the tree, which equals the number of layers of nodes
 //          in the tree. Returns zero if the tree is empty.
@@ -190,7 +192,7 @@ static void inorderHelper(Node * root){
     if(root->leftSubtree()){
         inorderHelper(root->leftSubtree());
     }
-    cout << root->getnum() << " ";
+    cout << root->getstr() << " ";
     if(root->rightSubtree()){
         inorderHelper(root->rightSubtree());
     }
@@ -205,10 +207,10 @@ void BinaryTree::inorder_str() const {
 
 static void postorderHelper(Node * root){
     if(root->leftSubtree()){
-        inorderHelper(root->leftSubtree());
+        postorderHelper(root->leftSubtree());
     }
     if(root->rightSubtree()){
-        inorderHelper(root->rightSubtree());
+        postorderHelper(root->rightSubtree());
     }
     cout << root->getnum() << " ";
 }
@@ -237,9 +239,9 @@ bool allPathSumGreaterHelper(int temp, const Node * n, int sum){
     return false;
 }
 
-bool BinaryTree::allPathSumGreater(int temp) const {
+bool BinaryTree::allPathSumGreater(int sum) const {
     // TODO: implement this function.
-    return allPathSumGreaterHelper(temp, root, 0);
+    return allPathSumGreaterHelper(sum, root, 0);
 }
 
 bool covered_by_helper(const Node * thisnode, const Node * treenode){
@@ -294,9 +296,28 @@ bool contained_by_helper(const Node * thisnode, const Node * treenode){
 
 bool BinaryTree::contained_by(const BinaryTree &tree) const {
     // TODO: implement this function.
-    contained_by_helper(root, tree.root);
+    return contained_by_helper(root, tree.root);
+}
+
+static Node * copyFrom(Node * n){
+    Node *left, *right;
+    left = nullptr;
+    right = nullptr;
+    if(n->leftSubtree()){
+        left = copyFrom(n->leftSubtree());
+    }
+    if(n->rightSubtree())
+    {
+        right = copyFrom(n->rightSubtree());
+    }
+
+    Node * node = new Node(n->getstr(), n->getnum(), left, right);
+    return node;
 }
 
 BinaryTree BinaryTree::copy() const {
     // TODO: implement this function.
+    if(!root)
+        return nullptr;
+    return copyFrom(root);
 }
