@@ -85,13 +85,13 @@ static string findPathHelper(const string & s, Node *root){
         // recursion
         result = findPathHelper(s, root->leftSubtree());
         if(result != "-1"){
-            result += "0";
+            result = "0" + result;
         }
     }
     if(root->rightSubtree() && result == "-1"){
         result = findPathHelper(s, root->rightSubtree());
         if(result != "-1"){
-            result += "1";
+            result = "1" + result;
         }
     }
     return result;
@@ -105,7 +105,7 @@ string BinaryTree::findPath(const string &s) const {
 
 int sumHelper(const Node * root){
     int sum = 0;
-    if(root->rightSubtree()){
+    if(root->leftSubtree()){
         sum += sumHelper(root->leftSubtree());
     }
     if(root->rightSubtree()){
@@ -184,6 +184,8 @@ static void preorderHelper(Node * root){
 
 void BinaryTree::preorder_num() const {
     // TODO: implement this function.
+    if(!root)
+        return;
     preorderHelper(root);
     cout << endl;
 }
@@ -201,6 +203,8 @@ static void inorderHelper(Node * root){
 
 void BinaryTree::inorder_str() const {
     // TODO: implement this function.
+    if(!root)
+        return;
     inorderHelper(root);
     cout << endl;
 }
@@ -218,22 +222,30 @@ static void postorderHelper(Node * root){
 
 void BinaryTree::postorder_num() const {
     // TODO: implement this function.
+    if(!root)
+        return;
     postorderHelper(root);
     cout << endl;
 }
 
 bool allPathSumGreaterHelper(int temp, const Node * n, int sum){
     sum += n->getnum();
-    if(sum > temp){
-        return true;
-    }
     // leaf
     if(!n->leftSubtree() && !n->rightSubtree()){
+        if(sum > temp){
+            return true;
+        }
         return false;
     }
     // having children
+    if(!n->leftSubtree() && (n->rightSubtree() && allPathSumGreaterHelper(temp, n->rightSubtree(), sum))){
+        return true;
+    }
+    if(!n->rightSubtree() && (n->leftSubtree() && allPathSumGreaterHelper(temp, n->leftSubtree(), sum))){
+        return true;
+    }
     if((n->leftSubtree() && allPathSumGreaterHelper(temp, n->leftSubtree(), sum))
-    || (n->rightSubtree() && allPathSumGreaterHelper(temp, n->rightSubtree(), sum))){
+    && (n->rightSubtree() && allPathSumGreaterHelper(temp, n->rightSubtree(), sum))){
         return true;
     }
     return false;
@@ -249,7 +261,7 @@ bool covered_by_helper(const Node * thisnode, const Node * treenode){
     if(thisnode->getnum() != treenode->getnum()){
         return false;
     }
-    // this has more chilren
+    // this has more children
     if((thisnode->leftSubtree() && !treenode->leftSubtree()) ||
             (thisnode->rightSubtree() && !treenode->rightSubtree())){
         return false;

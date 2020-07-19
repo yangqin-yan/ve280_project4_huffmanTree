@@ -34,7 +34,7 @@ void decompress(string & treefilename, string & binaryfilename){
                 i++;
             }
             //cout << str->getstr();
-            cout << str->getstr() << " ";
+            cout << str->getstr();
         }
     }
     file.close();
